@@ -45670,9 +45670,9 @@ namespace Thetis
                     MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, Common.MB_TOPMOST);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                DialogResult dr = MessageBox.Show("Could not find GetCMVersion() in channelmaster.dll .\nEnsure correct version installed.",
+                DialogResult dr = MessageBox.Show("Could not find GetCMVersion() in channelmaster.dll .\nEnsure correct version installed.\n\n" + ex.GetType().Name + ": " + ex.Message,  // NNR test build: show the real load error
                     "Version function error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, Common.MB_TOPMOST);
@@ -45690,9 +45690,9 @@ namespace Thetis
                     MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, Common.MB_TOPMOST);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                DialogResult dr = MessageBox.Show("Could not find GetCMasioVersion() in cmASIO.dll .\nEnsure correct version installed.",
+                DialogResult dr = MessageBox.Show("Could not find GetCMasioVersion() in cmASIO.dll .\nEnsure correct version installed.\n\n" + ex.GetType().Name + ": " + ex.Message,  // NNR test build: show the real load error
                     "Version function error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, Common.MB_TOPMOST);
@@ -45711,9 +45711,9 @@ namespace Thetis
                     MessageBoxIcon.Warning);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                DialogResult dr = MessageBox.Show("Could not find GetWDSPVersion() in wdsp.dll .\nEnsure correct version installed.",
+                DialogResult dr = MessageBox.Show("Could not find GetWDSPVersion() in wdsp.dll .\nEnsure correct version installed.\n\n" + ex.GetType().Name + ": " + ex.Message,  // NNR test build: show the real load error
                     "Version function error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -45735,9 +45735,9 @@ namespace Thetis
                     MessageBoxIcon.Warning);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                DialogResult dr = MessageBox.Show("Could not find PA_GetVersion() in portaudio.dll .\nEnsure correct version installed.",
+                DialogResult dr = MessageBox.Show("Could not find PA_GetVersion() in portaudio.dll .\nEnsure correct version installed.\n\n" + ex.GetType().Name + ": " + ex.Message,  // NNR test build: show the real load error
                     "Version function error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
