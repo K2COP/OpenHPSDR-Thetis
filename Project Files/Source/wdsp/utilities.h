@@ -87,4 +87,6 @@ extern __declspec (dllexport) void getFilterCurve(int id, int size, int w_type, 
 
 extern void test_bfcu();
 
+extern void dprintf(const char* format, ...); // NNR support (WDSP 2.11)
+
 #endif

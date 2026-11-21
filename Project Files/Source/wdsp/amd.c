@@ -268,7 +268,7 @@ SetRXAAMDRun(int channel, int run)
 	if (a->run != run)
 	{
         RXAbp1Check (channel, run, rxa[channel].snba.p->run, rxa[channel].emnr.p->run,
-                        rxa[channel].anf.p->run, rxa[channel].anr.p->run,
+                        getRun_nnrbypass (rxa[channel].nnrbypass.p), rxa[channel].anf.p->run, rxa[channel].anr.p->run,
 						rxa[channel].rnnr.p->run, rxa[channel].sbnr.p->run); // NR3 + NR4 support
 
 		EnterCriticalSection (&ch[channel].csDSP);

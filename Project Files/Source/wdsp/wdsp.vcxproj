@@ -253,6 +253,11 @@
     <ClInclude Include="resource1.h" />
     <ClInclude Include="rmatch.h" />
     <ClInclude Include="rnnr.h" />
+    <ClInclude Include="nnet.h" />
+    <ClInclude Include="nnet_profile.h" />
+    <ClInclude Include="nnio.h" />
+    <ClInclude Include="nnr.h" />
+    <ClInclude Include="nnrbypass.h" />
     <ClInclude Include="RXA.h" />
     <ClInclude Include="sbnr.h" />
     <ClInclude Include="sender.h" />
@@ -321,6 +326,14 @@
     <ClCompile Include="resample.c" />
     <ClCompile Include="rmatch.c" />
     <ClCompile Include="rnnr.c" />
+    <ClCompile Include="nnet.c" />
+    <ClCompile Include="nnio.c" />
+    <ClCompile Include="nnr.c" />
+    <ClCompile Include="nnrbypass.c" />
+    <ClCompile Include="nnr_model_0.c" />
+    <ClCompile Include="nnr_model_1.c" />
+    <ClCompile Include="nnr_model_2.c" />
+    <ClCompile Include="nnr_model_3.c" />
     <ClCompile Include="RXA.c" />
     <ClCompile Include="sbnr.c" />
     <ClCompile Include="sender.c" />

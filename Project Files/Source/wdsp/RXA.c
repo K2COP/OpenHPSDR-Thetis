@@ -348,7 +348,30 @@ void create_rxa (int channel)
 		rxa[channel].midbuff,							// input buffer
 		rxa[channel].midbuff,							// output buffer
 		ch[channel].dsp_rate);							// samplerate
-	
+
+	// NNR - neural network noise reduction			// NNR support (WDSP 2.11)
+	rxa[channel].nnr.p = create_nnr (
+		0,												// run
+		1,												// position - see setNNRbypassRun()
+		ch[channel].dsp_size,							// buffer size
+		rxa[channel].midbuff,							// input buffer
+		rxa[channel].midbuff,							// output buffer
+		ch[channel].dsp_rate,							// samplerate
+		-25.0,											// mask floor
+		1);												// output mode, 1 => (Q=0.0)
+
+	// NNRBYPASS - routes the training band around demod/pre-AGC NR when NNR runs	// NNR support (WDSP 2.11)
+	rxa[channel].nnrbypass.p = create_nnrbypass (
+		0,												// run
+		ch[channel].dsp_size,							// buffer size
+		2048,											// nc default
+		rxa[channel].midbuff,							// input buffer
+		rxa[channel].midbuff,							// output buffer
+		200.0,											// f_low
+		3000.0,											// f_high
+		ch[channel].dsp_rate,							// samplerate
+		1.0);											// gain
+
 	// AGC
 	rxa[channel].agc.p = create_wcpagc (
 		1,												// run
@@ -574,6 +597,8 @@ void destroy_rxa (int channel)
 	destroy_meter (rxa[channel].agcmeter.p);
 	destroy_wcpagc (rxa[channel].agc.p);
 	destroy_emnr (rxa[channel].emnr.p);
+	destroy_nnrbypass (rxa[channel].nnrbypass.p);	// NNR support (WDSP 2.11)
+	destroy_nnr (rxa[channel].nnr.p);				// NNR support (WDSP 2.11)
 	destroy_rnnr (rxa[channel].rnnr.p);	// NR3 + NR4 support (nr3)
     destroy_sbnr (rxa[channel].sbnr.p);	// NR3 + NR4 support (nr4)
 	destroy_anr (rxa[channel].anr.p);
@@ -620,6 +645,8 @@ void flush_rxa (int channel)
 	flush_anf (rxa[channel].anf.p);
 	flush_anr (rxa[channel].anr.p);
 	flush_emnr (rxa[channel].emnr.p);
+	flush_nnr (rxa[channel].nnr.p);					// NNR support (WDSP 2.11)
+	flush_nnrbypass (rxa[channel].nnrbypass.p);		// NNR support (WDSP 2.11)
 	flush_wcpagc (rxa[channel].agc.p);
 	flush_meter (rxa[channel].agcmeter.p);
 	flush_bandpass (rxa[channel].bp1.p);
@@ -641,24 +668,30 @@ void xrxa (int channel)
 	xresample (rxa[channel].rsmpin.p);
 	xgen (rxa[channel].gen0.p);
 	xmeter (rxa[channel].adcmeter.p);
+	xnnrbypin (rxa[channel].nnrbypass.p);			// NNR support (WDSP 2.11) - capture input for the bypass
 	xbpsnbain (rxa[channel].bpsnba.p, 0);
 	xnbp (rxa[channel].nbp0.p, 0);
 	xmeter (rxa[channel].smeter.p);
 	xsender (rxa[channel].sender.p);
 	xamsqcap (rxa[channel].amsq.p);
-	xbpsnbaout (rxa[channel].bpsnba.p, 0);
-	xamd (rxa[channel].amd.p);
-	xfmd (rxa[channel].fmd.p);
-	xfmsq (rxa[channel].fmsq.p);
-	xbpsnbain (rxa[channel].bpsnba.p, 1);
-	xbpsnbaout (rxa[channel].bpsnba.p, 1);
-	xsnba (rxa[channel].snba.p);
-	xeqp (rxa[channel].eqp.p);
-	xanf (rxa[channel].anf.p, 0);
-	xanr (rxa[channel].anr.p, 0);
-	xemnr (rxa[channel].emnr.p, 0);
-	xrnnr (rxa[channel].rnnr.p, 0);	// NR3 + NR4 support (nr3)
-    xsbnr (rxa[channel].sbnr.p, 0);	// NR3 + NR4 support (nr4)
+	if (!getRun_nnrbypass (rxa[channel].nnrbypass.p))	// NNR support (WDSP 2.11) - skipped while NNR bypass runs
+	{
+		xbpsnbaout (rxa[channel].bpsnba.p, 0);
+		xamd (rxa[channel].amd.p);
+		xfmd (rxa[channel].fmd.p);
+		xfmsq (rxa[channel].fmsq.p);
+		xbpsnbain (rxa[channel].bpsnba.p, 1);
+		xbpsnbaout (rxa[channel].bpsnba.p, 1);
+		xsnba (rxa[channel].snba.p);
+		xeqp (rxa[channel].eqp.p);
+		xanf (rxa[channel].anf.p, 0);
+		xanr (rxa[channel].anr.p, 0);
+		xemnr (rxa[channel].emnr.p, 0);
+		xrnnr (rxa[channel].rnnr.p, 0);	// NR3 + NR4 support (nr3)
+		xsbnr (rxa[channel].sbnr.p, 0);	// NR3 + NR4 support (nr4)
+	}
+	xnnrbypout (rxa[channel].nnrbypass.p);			// NNR support (WDSP 2.11)
+	xnnr (rxa[channel].nnr.p, 0);					// NNR support (WDSP 2.11)
 	xbandpass (rxa[channel].bp1.p, 0);
 	xcbl(rxa[channel].cbl.p, 0);	// [2.10.3.13]MW0LGE carrier removal before AGC
 	xwcpagc (rxa[channel].agc.p);
@@ -667,6 +700,7 @@ void xrxa (int channel)
 	xemnr (rxa[channel].emnr.p, 1);
     xrnnr (rxa[channel].rnnr.p, 1);	// NR3 + NR4 support (nr3)
     xsbnr (rxa[channel].sbnr.p, 1);	// NR3 + NR4 support (nr4)
+	xnnr (rxa[channel].nnr.p, 1);					// NNR support (WDSP 2.11)
 	xbandpass (rxa[channel].bp1.p, 1);
 	xmeter (rxa[channel].agcmeter.p);
 	xsiphon (rxa[channel].sip1.p, 0);
@@ -742,6 +776,8 @@ void setDSPSamplerate_rxa (int channel)
 	setSamplerate_emnr (rxa[channel].emnr.p, ch[channel].dsp_rate);
 	setSamplerate_rnnr(rxa[channel].rnnr.p, ch[channel].dsp_rate); // NR3 + NR4 support (nr3)
 	setSamplerate_sbnr(rxa[channel].sbnr.p, ch[channel].dsp_rate); // NR3 + NR4 support (nr4)
+	setSamplerate_nnr (rxa[channel].nnr.p, ch[channel].dsp_rate);				// NNR support (WDSP 2.11)
+	setSamplerate_nnrbypass (rxa[channel].nnrbypass.p, ch[channel].dsp_rate);	// NNR support (WDSP 2.11)
 	setSamplerate_bandpass (rxa[channel].bp1.p, ch[channel].dsp_rate);
 	setSamplerate_wcpagc (rxa[channel].agc.p, ch[channel].dsp_rate);
 	setSamplerate_meter (rxa[channel].agcmeter.p, ch[channel].dsp_rate);
@@ -758,6 +794,7 @@ void setDSPSamplerate_rxa (int channel)
 	setBuffers_resample (rxa[channel].rsmpout.p, rxa[channel].midbuff, rxa[channel].outbuff);
 	setInRate_resample (rxa[channel].rsmpout.p, ch[channel].dsp_rate);
 	RXAResCheck (channel);
+	setNNRbypassRun (channel);						// NNR support (WDSP 2.11)
 }
 
 void setDSPBuffsize_rxa (int channel)
@@ -810,6 +847,10 @@ void setDSPBuffsize_rxa (int channel)
 	setSize_sbnr(rxa[channel].sbnr.p, ch[channel].dsp_size); // NR3 + NR4 support (nr4)
     setBuffers_sbnr (rxa[channel].sbnr.p, rxa[channel].midbuff, rxa[channel].midbuff); // NR3 + NR4 support (nr4)
 	setSize_emnr (rxa[channel].emnr.p, ch[channel].dsp_size);
+	setBuffers_nnr (rxa[channel].nnr.p, rxa[channel].midbuff, rxa[channel].midbuff);				// NNR support (WDSP 2.11)
+	setSize_nnr (rxa[channel].nnr.p, ch[channel].dsp_size);										// NNR support (WDSP 2.11)
+	setBuffers_nnrbypass (rxa[channel].nnrbypass.p, rxa[channel].midbuff, rxa[channel].midbuff);	// NNR support (WDSP 2.11)
+	setSize_nnrbypass (rxa[channel].nnrbypass.p, ch[channel].dsp_size);							// NNR support (WDSP 2.11)
 	setBuffers_bandpass (rxa[channel].bp1.p, rxa[channel].midbuff, rxa[channel].midbuff);
 	setSize_bandpass (rxa[channel].bp1.p, ch[channel].dsp_size);
 	setBuffers_wcpagc (rxa[channel].agc.p, rxa[channel].midbuff, rxa[channel].midbuff);
@@ -837,6 +878,7 @@ void setDSPBuffsize_rxa (int channel)
 	// output resampler
 	setBuffers_resample (rxa[channel].rsmpout.p, rxa[channel].midbuff, rxa[channel].outbuff);
 	setSize_resample (rxa[channel].rsmpout.p, ch[channel].dsp_size);
+	setNNRbypassRun (channel);						// NNR support (WDSP 2.11) - see setDSPSamplerate_rxa
 }
 
 /********************************************************************************************************
@@ -854,6 +896,7 @@ void SetRXAMode (int channel, int mode)
 		RXAbpsnbaCheck (channel, mode, rxa[channel].ndb.p->master_run);
 
 		RXAbp1Check (channel, amd_run, rxa[channel].snba.p->run, rxa[channel].emnr.p->run,
+                             getRun_nnrbypass (rxa[channel].nnrbypass.p), // NNR support (WDSP 2.11)
                              rxa[channel].anf.p->run, rxa[channel].anr.p->run,
                              rxa[channel].rnnr.p->run, rxa[channel].sbnr.p->run); // NR3 + NR4 support
 
@@ -885,6 +928,7 @@ void SetRXAMode (int channel, int mode)
 		}
 		RXAbp1Set (channel);
 		RXAbpsnbaSet (channel);							// update variables
+		setNNRbypassRun (channel);						// NNR support (WDSP 2.11) - bypass band follows mode
 		LeaveCriticalSection (&ch[channel].csDSP);
 	}
 }
@@ -901,14 +945,15 @@ void RXAResCheck (int channel)
 }
 
 void RXAbp1Check (int channel, int amd_run, int snba_run, 
-	int emnr_run, int anf_run, int anr_run,
-	int rnnr_run, int sbnr_run) // NR3 + NR4 support
+	int emnr_run, int nnrbypass_run, int anf_run, int anr_run,
+	int rnnr_run, int sbnr_run) // NR3 + NR4 support, NNR support (WDSP 2.11)
 {
 	BANDPASS a = rxa[channel].bp1.p;
 	double gain;
 	if (amd_run  ||
 		snba_run ||
 		emnr_run ||
+		nnrbypass_run || // NNR support (WDSP 2.11)
         rnnr_run || // NR3 + NR4 support (nr3)
         sbnr_run || // NR3 + NR4 support (nr4)
 		anf_run  ||
@@ -925,6 +970,7 @@ void RXAbp1Set (int channel)
 	if ((rxa[channel].amd.p->run  == 1) ||
 		(rxa[channel].snba.p->run == 1) ||
 		(rxa[channel].emnr.p->run == 1) ||
+		getRun_nnrbypass (rxa[channel].nnrbypass.p) ||  // NNR support (WDSP 2.11)
         (rxa[channel].rnnr.p->run == 1) ||  // NR3 + NR4 support (nr3)
         (rxa[channel].sbnr.p->run == 1) ||  // NR3 + NR4 support (nr4)
 		(rxa[channel].anf.p->run  == 1) ||

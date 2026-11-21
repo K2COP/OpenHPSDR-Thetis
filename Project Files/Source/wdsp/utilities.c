@@ -633,3 +633,16 @@ void test_bfcu()
 	_aligned_free(segment);
 	destroy_bfcu(0);
 }
+
+// NNR support (WDSP 2.11) - taken from TAPR WDSP 2.11 utilities.c; used by nnr.c / nnet.c / nnio.c.
+// Prints to the Visual Studio Debug Window; works like printf(...)
+#include <stdarg.h>
+void dprintf(const char* format, ...)
+{
+	char buffer[512];
+	va_list args;
+	va_start(args, format);
+	vsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
+	OutputDebugStringA(buffer);
+}
