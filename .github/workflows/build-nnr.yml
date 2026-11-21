@@ -31,10 +31,8 @@ jobs:
           $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
           $vsver = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationVersion
           Write-Host "Visual Studio: $vs ($vsver)"
-          $toolsets = Get-ChildItem "$vs\MSBuild\Microsoft\VC\*\Platforms\x64\PlatformToolsets" -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name | Sort-Object -Unique
-          Write-Host "Available toolsets: $($toolsets -join ', ')"
-          $pick = @('v145','v143','v142') | Where-Object { $toolsets -contains $_ } | Select-Object -First 1
-          if (-not $pick) { throw "No usable C++ toolset found" }
+          $major = [int]($vsver.Split('.')[0])
+          if ($major -ge 18) { $pick = 'v145' } elseif ($major -eq 17) { $pick = 'v143' } else { throw "Visual Studio $vsver is too old" }
           Write-Host "Using toolset $pick"
           "toolset=$pick" >> $env:GITHUB_OUTPUT
 
