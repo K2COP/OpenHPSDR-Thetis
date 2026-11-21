@@ -381,7 +381,8 @@ namespace Thetis
             this.RXASBNRpostFilterThreshold = rx.rx_nr4_postFilterThreshold;
             this.RXASBNRnoiseScalingType = rx.rx_nr4_noiseScalingType;
             // NNR (NR5)
-            this.RXANR5Model = rx.rx_nr5_model;
+            this.RXANR5VoicePremium = rx.rx_nr5_voice_premium;
+            this.RXANR5CWPremium = rx.rx_nr5_cw_premium;
             this.RXANR5MaskFloor = rx.rx_nr5_mask_floor;
             this.RXANR5Run = rx.rx_nr5_run;
             //
@@ -488,7 +489,8 @@ namespace Thetis
             RXASBNRpostFilterThreshold = rx_nr4_postFilterThreshold;
             RXASBNRnoiseScalingType = rx_nr4_noiseScalingType;
             // NNR (NR5)
-            RXANR5Model = rx_nr5_model;
+            RXANR5VoicePremium = rx_nr5_voice_premium;
+            RXANR5CWPremium = rx_nr5_cw_premium;
             RXANR5MaskFloor = rx_nr5_mask_floor;
             RXANR5Run = rx_nr5_run;
             //
@@ -599,6 +601,7 @@ namespace Thetis
 						dsp_mode_dsp = value;
 					}
 				}
+				applyNR5Model(); // NNR: voice or CW model follows the mode
 			}
 		}
 
@@ -2335,23 +2338,47 @@ namespace Thetis
                 }
             }
         }
-        // 0 = Voice Standard, 1 = Voice Premium, 2 = CW Standard, 3 = CW Premium
-        private int rx_nr5_model = 0;
-        private int rx_nr5_model_dsp = 0;
-        public int RXANR5Model
+        // The WDSP model slot is chosen automatically from the RX mode:
+        //   CWL/CWU -> CW model (2 = CW Standard, 3 = CW Premium)
+        //   any other mode -> Voice model (0 = Voice Standard, 1 = Voice Premium)
+        // The user only picks Standard/Premium separately for voice and for CW.
+        private int rx_nr5_voice_premium = 0; // 0 = Standard, 1 = Premium
+        public int RXANR5VoicePremium
         {
-            get { return rx_nr5_model; }
+            get { return rx_nr5_voice_premium; }
             set
             {
-                if (value < 0 || value > 3) value = 0;
-                rx_nr5_model = value;
-                if (update)
+                rx_nr5_voice_premium = value != 0 ? 1 : 0;
+                applyNR5Model();
+            }
+        }
+        private int rx_nr5_cw_premium = 0; // 0 = Standard, 1 = Premium
+        public int RXANR5CWPremium
+        {
+            get { return rx_nr5_cw_premium; }
+            set
+            {
+                rx_nr5_cw_premium = value != 0 ? 1 : 0;
+                applyNR5Model();
+            }
+        }
+        private int rx_nr5_model = 0;
+        private int rx_nr5_model_dsp = 0;
+        public int RXANR5Model // the model actually in use (0..3), read-only
+        {
+            get { return rx_nr5_model; }
+        }
+        private void applyNR5Model()
+        {
+            bool cw = dsp_mode == DSPMode.CWL || dsp_mode == DSPMode.CWU;
+            int value = cw ? 2 + rx_nr5_cw_premium : rx_nr5_voice_premium;
+            rx_nr5_model = value;
+            if (update)
+            {
+                if (value != rx_nr5_model_dsp || force)
                 {
-                    if (value != rx_nr5_model_dsp || force)
-                    {
-                        WDSP.SetRXANNRModel(WDSP.id(thread, subrx), value);
-                        rx_nr5_model_dsp = value;
-                    }
+                    WDSP.SetRXANNRModel(WDSP.id(thread, subrx), value);
+                    rx_nr5_model_dsp = value;
                 }
             }
         }
