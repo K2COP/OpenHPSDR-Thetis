@@ -1,0 +1,71 @@
+name: Build Thetis (NNR)
+
+on:
+  push:
+    branches: [ nnr-hl2 ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Set up NuGet
+        uses: NuGet/setup-nuget@v2
+
+      # The solution targets the VS2026 C++ toolset (v145). Use it if the runner has it,
+      # otherwise fall back to the newest one installed (v143 = VS2022).
+      - name: Pick C++ toolset
+        id: toolset
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+          $vsver = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationVersion
+          Write-Host "Visual Studio: $vs ($vsver)"
+          $toolsets = Get-ChildItem "$vs\MSBuild\Microsoft\VC\*\Platforms\x64\PlatformToolsets" -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name | Sort-Object -Unique
+          Write-Host "Available toolsets: $($toolsets -join ', ')"
+          $pick = @('v145','v143','v142') | Where-Object { $toolsets -contains $_ } | Select-Object -First 1
+          if (-not $pick) { throw "No usable C++ toolset found" }
+          Write-Host "Using toolset $pick"
+          "toolset=$pick" >> $env:GITHUB_OUTPUT
+
+      - name: Restore NuGet packages
+        working-directory: Project Files/Source
+        run: nuget restore Thetis_VS2026.sln
+
+      - name: Build (Release x64)
+        working-directory: Project Files/Source
+        run: >
+          msbuild Thetis_VS2026.sln
+          /p:Configuration=Release
+          /p:Platform=x64
+          /p:PlatformToolset=${{ steps.toolset.outputs.toolset }}
+          /m
+          /v:minimal
+          /fl "/flp:logfile=build.log;verbosity=normal"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: Project Files/Source/build.log
+          if-no-files-found: ignore
+
+      - name: Upload Thetis build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Thetis-NNR-x64-Release
+          path: |
+            Project Files/bin/x64/Release/
+            !Project Files/bin/x64/Release/**/*.pdb
+          if-no-files-found: error
