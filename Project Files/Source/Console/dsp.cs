@@ -283,6 +283,21 @@ namespace Thetis
         public static extern void SetRXASBNRnoiseScalingType(int channel, int noise_scaling_type);        
         //
 
+        // NNR - neural noise reduction (WDSP 2.11), "NR5" in the UI
+        [DllImport("wdsp.dll", EntryPoint = "SetRXANNRRun", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetRXANNRRun(int channel, int run);
+
+        // slot: 0 = Voice Standard, 1 = Voice Premium, 2 = CW Standard, 3 = CW Premium; returns the model now in use
+        [DllImport("wdsp.dll", EntryPoint = "SetRXANNRModel", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SetRXANNRModel(int channel, int slot);
+
+        [DllImport("wdsp.dll", EntryPoint = "GetRXANNRModel", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int GetRXANNRModel(int channel);
+
+        [DllImport("wdsp.dll", EntryPoint = "SetRXANNRMaskFloor", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetRXANNRMaskFloor(int channel, double floor_db);
+        //
+
         [DllImport("wdsp.dll", EntryPoint = "SetRXAEMNRPosition", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetRXAEMNRPosition(int channel, int position);
 

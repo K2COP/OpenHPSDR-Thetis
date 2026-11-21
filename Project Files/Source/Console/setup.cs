@@ -110,6 +110,7 @@ namespace Thetis
         {
             LogTool.AddLogEntry("      Setup init components...", "INITCOMPSETUP");
             InitializeComponent();
+            initialiseNNRTab(); // NNR (WDSP 2.11) - must exist before getOptions so its controls are saved/restored
 
             _original_pnlP1_adcs_location = pnlP1_adcs.Location;
 
@@ -2583,6 +2584,13 @@ namespace Thetis
             nudNR4_snr_rx2_ValueChanged(this, e);
 
             setupNR4algorithm();
+            //
+
+            //nnr (NR5)
+            comboNNRModel_rx1_SelectedIndexChanged(this, e);
+            nudNNRMaskFloor_rx1_ValueChanged(this, e);
+            comboNNRModel_rx2_SelectedIndexChanged(this, e);
+            nudNNRMaskFloor_rx2_ValueChanged(this, e);
             //
 
             // Transmit Tab
@@ -35646,6 +35654,113 @@ namespace Thetis
                 nudNR4_red_rx2.Value = (decimal)value;
             }
         }
+        #region NNR (NR5) - neural noise reduction, WDSP 2.11
+        // The tab is built in code (not the designer) to keep the port self-contained.
+        // Control names are what the database stores, so do not rename them.
+        private static readonly string[] _nnr_model_names = { "Voice - Standard", "Voice - Premium", "CW - Standard", "CW - Premium" };
+        private TabPage tpDSPNNR;
+        private ComboBoxTS comboNNRModel_rx1;
+        private ComboBoxTS comboNNRModel_rx2;
+        private NumericUpDownTS nudNNRMaskFloor_rx1;
+        private NumericUpDownTS nudNNRMaskFloor_rx2;
+
+        private void initialiseNNRTab()
+        {
+            tpDSPNNR = new TabPage("NNR") { Name = "tpDSPNNR", BackColor = SystemColors.Control };
+
+            GroupBoxTS makeGroup(string title, int x, out ComboBoxTS combo, out NumericUpDownTS nud, string suffix)
+            {
+                GroupBoxTS g = new GroupBoxTS { Text = title, Location = new Point(x, 8), Size = new Size(235, 110) };
+
+                LabelTS lblModel = new LabelTS { Text = "Model:", Location = new Point(10, 27), AutoSize = true };
+                combo = new ComboBoxTS { Name = "comboNNRModel_" + suffix, DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(85, 24), Size = new Size(135, 21) };
+                combo.Items.AddRange(_nnr_model_names);
+                combo.SelectedIndex = 0;
+
+                LabelTS lblFloor = new LabelTS { Text = "Mask floor (dB):", Location = new Point(10, 62), AutoSize = true };
+                nud = new NumericUpDownTS { Name = "nudNNRMaskFloor_" + suffix, Minimum = -50, Maximum = -10, Increment = 1, DecimalPlaces = 0, Value = -25, Location = new Point(150, 60), Size = new Size(70, 20) };
+
+                g.Controls.Add(lblModel);
+                g.Controls.Add(combo);
+                g.Controls.Add(lblFloor);
+                g.Controls.Add(nud);
+                return g;
+            }
+
+            GroupBoxTS grpRX1 = makeGroup("NNR RX1", 8, out comboNNRModel_rx1, out nudNNRMaskFloor_rx1, "rx1");
+            GroupBoxTS grpRX2 = makeGroup("NNR RX2", 251, out comboNNRModel_rx2, out nudNNRMaskFloor_rx2, "rx2");
+
+            comboNNRModel_rx1.SelectedIndexChanged += comboNNRModel_rx1_SelectedIndexChanged;
+            comboNNRModel_rx2.SelectedIndexChanged += comboNNRModel_rx2_SelectedIndexChanged;
+            nudNNRMaskFloor_rx1.ValueChanged += nudNNRMaskFloor_rx1_ValueChanged;
+            nudNNRMaskFloor_rx2.ValueChanged += nudNNRMaskFloor_rx2_ValueChanged;
+
+            LabelTS lblInfo = new LabelTS
+            {
+                Location = new Point(8, 128),
+                Size = new Size(478, 90),
+                Text = "NNR (NR5) is the WDSP 2.11 neural noise reduction by NR0V.\n" +
+                       "Select it from the DSP menu, the NR button, CAT ZZNE5/ZZNF5 or MIDI.\n\n" +
+                       "Use a Voice model for SSB/AM and a CW model for CW. Premium models need much more CPU.\n" +
+                       "A lower mask floor removes more noise; a higher floor lets more through and sounds more natural.\n" +
+                       "While NNR runs in SSB/CW/DIG, the RX EQ and any pre-AGC noise reduction are bypassed."
+            };
+
+            tpDSPNNR.Controls.Add(grpRX1);
+            tpDSPNNR.Controls.Add(grpRX2);
+            tpDSPNNR.Controls.Add(lblInfo);
+
+            // appended (not inserted after NR) because ShowSetupTab() selects DSP sub-tabs by index
+            tcDSP.TabPages.Add(tpDSPNNR);
+        }
+
+        private void comboNNRModel_rx1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (initializing) return;
+            int model = Math.Max(0, comboNNRModel_rx1.SelectedIndex);
+            console.radio.GetDSPRX(0, 0).RXANR5Model = model;
+            console.radio.GetDSPRX(0, 1).RXANR5Model = model;
+        }
+        private void comboNNRModel_rx2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (initializing) return;
+            int model = Math.Max(0, comboNNRModel_rx2.SelectedIndex);
+            console.radio.GetDSPRX(1, 0).RXANR5Model = model;
+            console.radio.GetDSPRX(1, 1).RXANR5Model = model;
+        }
+        private void nudNNRMaskFloor_rx1_ValueChanged(object sender, EventArgs e)
+        {
+            if (initializing) return;
+            console.radio.GetDSPRX(0, 0).RXANR5MaskFloor = (double)nudNNRMaskFloor_rx1.Value;
+            console.radio.GetDSPRX(0, 1).RXANR5MaskFloor = (double)nudNNRMaskFloor_rx1.Value;
+        }
+        private void nudNNRMaskFloor_rx2_ValueChanged(object sender, EventArgs e)
+        {
+            if (initializing) return;
+            console.radio.GetDSPRX(1, 0).RXANR5MaskFloor = (double)nudNNRMaskFloor_rx2.Value;
+            console.radio.GetDSPRX(1, 1).RXANR5MaskFloor = (double)nudNNRMaskFloor_rx2.Value;
+        }
+
+        public void ShowNNRTab()
+        {
+            ShowSetupTab(SetupTab.NR_Tab); // shows the form and selects the DSP tab
+            tcDSP.SelectedTab = tpDSPNNR;
+        }
+
+        // used by console/cat/midi to read or set the NNR model (0..3) for an rx (1 or 2)
+        public int GetNNRModel(int rx)
+        {
+            ComboBoxTS c = rx == 2 ? comboNNRModel_rx2 : comboNNRModel_rx1;
+            return Math.Max(0, c.SelectedIndex);
+        }
+        public void SetNNRModel(int rx, int model)
+        {
+            if (model < 0 || model > 3) return;
+            ComboBoxTS c = rx == 2 ? comboNNRModel_rx2 : comboNNRModel_rx1;
+            c.SelectedIndex = model;
+        }
+        #endregion
+
         private void nudNR4_red_rx1_ValueChanged(object sender, EventArgs e)
         {
             if (initializing) return;

@@ -2240,6 +2240,52 @@ namespace Thetis
             }
             return CmdState.NoChange;
         }
+        // NNR - neural noise reduction (WDSP 2.11), NR value 5 (RX1)
+        public CmdState NoiseReduction5OnOff(int msg, MidiDevice device)
+        {
+            if (msg == 127)
+            {
+                parser.nGet = 0;
+                parser.nSet = 1;
+
+                int NRState = Convert.ToInt16(commands.ZZNE(""));
+
+                if (NRState != 5)
+                {
+                    commands.ZZNE("5");
+                    return CmdState.On;
+                }
+                if (NRState == 5)
+                {
+                    commands.ZZNE("0");
+                    return CmdState.Off;
+                }
+            }
+            return CmdState.NoChange;
+        }
+        // NNR - neural noise reduction (WDSP 2.11), NR value 5 (RX2)
+        public CmdState Rx2NoiseReduction5OnOff(int msg, MidiDevice device)
+        {
+            if (msg == 127)
+            {
+                parser.nGet = 0;
+                parser.nSet = 1;
+
+                int NRState = Convert.ToInt16(commands.ZZNF(""));
+
+                if (NRState != 5)
+                {
+                    commands.ZZNF("5");
+                    return CmdState.On;
+                }
+                if (NRState == 5)
+                {
+                    commands.ZZNF("0");
+                    return CmdState.Off;
+                }
+            }
+            return CmdState.NoChange;
+        }
         public CmdState Rx2PreAmpOnOff(int msg, MidiDevice device)
         {
             if (msg == 127)

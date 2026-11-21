@@ -380,6 +380,10 @@ namespace Thetis
             this.RXASBNRnoiseRescale = rx.rx_nr4_noiseRescale;
             this.RXASBNRpostFilterThreshold = rx.rx_nr4_postFilterThreshold;
             this.RXASBNRnoiseScalingType = rx.rx_nr4_noiseScalingType;
+            // NNR (NR5)
+            this.RXANR5Model = rx.rx_nr5_model;
+            this.RXANR5MaskFloor = rx.rx_nr5_mask_floor;
+            this.RXANR5Run = rx.rx_nr5_run;
             //
             this.RXFilterLow = rx.rx_filter_low;
             this.RXFilterHigh = rx.rx_filter_high;
@@ -483,6 +487,10 @@ namespace Thetis
             RXASBNRnoiseRescale = rx_nr4_noiseRescale;
             RXASBNRpostFilterThreshold = rx_nr4_postFilterThreshold;
             RXASBNRnoiseScalingType = rx_nr4_noiseScalingType;
+            // NNR (NR5)
+            RXANR5Model = rx_nr5_model;
+            RXANR5MaskFloor = rx_nr5_mask_floor;
+            RXANR5Run = rx_nr5_run;
             //
             RXFMLowCut = rx_fm_lowcut;
             RXFMHighCut = rx_fm_highcut;
@@ -2304,6 +2312,63 @@ namespace Thetis
                     {
                         WDSP.SetRXARNNRUseDefaultGain(WDSP.id(thread, subrx), value);
                         rx_nr3_fixed_gain_dsp = value;
+                    }
+                }
+            }
+        }
+        // NNR - neural noise reduction (WDSP 2.11), shown as NR5
+        private int rx_nr5_run = 0;
+        private int rx_nr5_run_dsp = 0;
+        public int RXANR5Run
+        {
+            get { return rx_nr5_run; }
+            set
+            {
+                rx_nr5_run = value;
+                if (update)
+                {
+                    if (value != rx_nr5_run_dsp || force)
+                    {
+                        WDSP.SetRXANNRRun(WDSP.id(thread, subrx), value);
+                        rx_nr5_run_dsp = value;
+                    }
+                }
+            }
+        }
+        // 0 = Voice Standard, 1 = Voice Premium, 2 = CW Standard, 3 = CW Premium
+        private int rx_nr5_model = 0;
+        private int rx_nr5_model_dsp = 0;
+        public int RXANR5Model
+        {
+            get { return rx_nr5_model; }
+            set
+            {
+                if (value < 0 || value > 3) value = 0;
+                rx_nr5_model = value;
+                if (update)
+                {
+                    if (value != rx_nr5_model_dsp || force)
+                    {
+                        WDSP.SetRXANNRModel(WDSP.id(thread, subrx), value);
+                        rx_nr5_model_dsp = value;
+                    }
+                }
+            }
+        }
+        private double rx_nr5_mask_floor = -25.0;
+        private double rx_nr5_mask_floor_dsp = -25.0;
+        public double RXANR5MaskFloor
+        {
+            get { return rx_nr5_mask_floor; }
+            set
+            {
+                rx_nr5_mask_floor = value;
+                if (update)
+                {
+                    if (value != rx_nr5_mask_floor_dsp || force)
+                    {
+                        WDSP.SetRXANNRMaskFloor(WDSP.id(thread, subrx), value);
+                        rx_nr5_mask_floor_dsp = value;
                     }
                 }
             }

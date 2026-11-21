@@ -9016,7 +9016,7 @@ namespace Thetis
                             break;
                         case OtherButtonId.NR:
                             int nr = _console.GetSelectedNR(_owningmeter.RX);
-                            sText = nr > 1 ? "NR" + nr.ToString() : "NR";
+                            sText = nr == 5 ? "NNR" : (nr > 1 ? "NR" + nr.ToString() : "NR"); // 5 = NNR (WDSP 2.11)
                             break;
                         case OtherButtonId.NB:
                             int nb = _console.GetSelectedNB(_owningmeter.RX);

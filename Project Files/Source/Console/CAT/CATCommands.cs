@@ -4996,7 +4996,7 @@ namespace Thetis
         }
 
         // Sets or reads the RX1 Noise Reduction status
-		// returns 0 for off, 1,2,3,4 depending on NR in use
+		// returns 0 for off, 1,2,3,4,5 depending on NR in use (5 = NNR)
         public string ZZNE(string s)
         {
             int sx = 0;
@@ -5004,7 +5004,7 @@ namespace Thetis
             if (s != "")
                 sx = Convert.ToInt32(s);
 
-            if (s.Length == parser.nSet && (s == "0" || s == "1" || s == "2" || s == "3" || s == "4"))
+            if (s.Length == parser.nSet && (s == "0" || s == "1" || s == "2" || s == "3" || s == "4" || s == "5"))  // 5 = NNR (WDSP 2.11)
             {
                 console.SelectNR(1, true, sx);
 
@@ -5020,7 +5020,7 @@ namespace Thetis
             }
         }
         // Sets or reads the RX2 Noise Reduction status
-        // returns 0 for off, 1,2,3,4 depending on NR in use
+        // returns 0 for off, 1,2,3,4,5 depending on NR in use (5 = NNR)
         public string ZZNF(string s)
         {
             int sx = 0;
@@ -5028,7 +5028,7 @@ namespace Thetis
             if (s != "")
                 sx = Convert.ToInt32(s);
 
-            if (s.Length == parser.nSet && (s == "0" || s == "1" || s == "2" || s == "3" || s == "4"))
+            if (s.Length == parser.nSet && (s == "0" || s == "1" || s == "2" || s == "3" || s == "4" || s == "5"))  // 5 = NNR (WDSP 2.11)
             {
                 console.SelectNR(2, true, sx);
 

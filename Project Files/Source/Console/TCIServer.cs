@@ -4692,7 +4692,7 @@ namespace Thetis
                 //set
                 if (!bool.TryParse(args[1], out enable)) return;
                 if (is_extended && !int.TryParse(args[2], out nr)) return;
-                if (nr < 0 || nr > 4) return;
+                if (nr < 0 || nr > 5) return; // 5 = NNR (WDSP 2.11)
 
                 if (enable)
                 {

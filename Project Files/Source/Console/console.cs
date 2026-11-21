@@ -757,6 +757,7 @@ namespace Thetis
             Common.DoubleBufferAll(this, true);
 
             InitialiseAndromedaMenus();
+            initialiseNNRMenus(); // NNR (WDSP 2.11)
 
             //
             ucQuickRecallPad.console = this;
@@ -44252,6 +44253,23 @@ namespace Thetis
             CWFWKeyer = chkCWFWKeyer.Checked;
         }
 
+        // NNR - neural noise reduction (WDSP 2.11), selected as NR 5.
+        // The menu items are created in code (not the designer) to keep the port self-contained.
+        private ToolStripMenuItem NR5ToolStripMenuItem;
+        private ToolStripMenuItem NR5ToolStripMenuItem_rx2;
+        private void initialiseNNRMenus()
+        {
+            NR5ToolStripMenuItem = new ToolStripMenuItem("NNR") { Name = "NR5ToolStripMenuItem", ToolTipText = "Neural network noise reduction (NR5)" };
+            NR5ToolStripMenuItem.Click += (s, e) => { SelectNR(1, true, _nr_selected[0] == 5 ? 0 : 5); };
+            int idx = dSPToolStripMenuItem.DropDownItems.IndexOf(NR4ToolStripMenuItem);
+            dSPToolStripMenuItem.DropDownItems.Insert(idx + 1, NR5ToolStripMenuItem);
+
+            NR5ToolStripMenuItem_rx2 = new ToolStripMenuItem("NNR") { Name = "NR5ToolStripMenuItem_rx2", ToolTipText = "Neural network noise reduction (NR5)" };
+            NR5ToolStripMenuItem_rx2.Click += (s, e) => { SelectNR(2, true, _nr_selected[1] == 5 ? 0 : 5); };
+            idx = dSPToolStripMenuItem1.DropDownItems.IndexOf(NR4ToolStripMenuItem_rx2);
+            dSPToolStripMenuItem1.DropDownItems.Insert(idx + 1, NR5ToolStripMenuItem_rx2);
+        }
+
         private int[] _nr_selected = new int[]{ 0, 0 }; // the current NR for each rx
         private void nr_selected_from_text(string text)
         {
@@ -44297,7 +44315,7 @@ namespace Thetis
             int old_nr = _nr_selected[rx - 1];
 
             _nr_selected[rx - 1] += 1;
-            if (_nr_selected[rx - 1] > 4) _nr_selected[rx - 1] = 0;
+            if (_nr_selected[rx - 1] > 5) _nr_selected[rx - 1] = 0; // 5 = NNR (WDSP 2.11)
 
             setupNR(rx, false);
             setupNR(rx, true);
@@ -44307,7 +44325,7 @@ namespace Thetis
         public void SelectNR(int rx, bool incude_sub, int nr)
         {
             if (rx < 1 || rx > 2) return;
-            if (nr < 0 || nr > 4) return;
+            if (nr < 0 || nr > 5) return; // 5 = NNR (WDSP 2.11)
 
             int old_nr = _nr_selected[rx - 1];
 
@@ -44339,7 +44357,12 @@ namespace Thetis
 
             int nr = _nr_selected[rx - 1];
             if (nr < 0) nr = 0;
-            if (nr > 4) nr = 4;
+            if (nr > 5) nr = 5; // 5 = NNR (WDSP 2.11)
+
+            // NNR (NR5) - turned off here for every selection except 5, which turns it on below
+            if (nr != 5) rad.RXANR5Run = 0;
+            if (rx == 1 && NR5ToolStripMenuItem != null) NR5ToolStripMenuItem.Checked = false;
+            if (rx == 2 && NR5ToolStripMenuItem_rx2 != null) NR5ToolStripMenuItem_rx2.Checked = false;
 
             switch (nr)
             {
@@ -44499,6 +44522,41 @@ namespace Thetis
                             NR4ToolStripMenuItem_rx2.Checked = true;
                             chkRX2NR.Text = "NR4";
                             lblRX2NRLabel.Text = "NR4";
+                            chkRX2NR.Checked = true;
+                            break;
+                    }
+                    break;
+                case 5: // NNR - neural noise reduction (WDSP 2.11)
+                    rad.RXANR4Run = 0;
+                    rad.RXANR3Run = 0;
+                    rad.RXANR2Run = 0;
+                    rad.RXANR1Run = 0;
+                    rad.RXANR5Run = 1;
+
+                    switch (rx)
+                    {
+                        case 1:
+                            cat_nr_status = 0;
+                            cat_nr2_status = 0;
+                            NRToolStripMenuItem.Checked = false;
+                            NR2ToolStripMenuItem1.Checked = false;
+                            NR3ToolStripMenuItem.Checked = false;
+                            NR4ToolStripMenuItem.Checked = false;
+                            if (NR5ToolStripMenuItem != null) NR5ToolStripMenuItem.Checked = true;
+                            chkNR.Text = "NNR";
+                            lblNRLabel.Text = "NNR";
+                            chkNR.Checked = true;
+                            break;
+                        case 2:
+                            cat_rx2_nr_status = 0;
+                            cat_rx2_nr2_status = 0;
+                            nR2ToolStripMenuItem.Checked = false;
+                            NR2StripMenuItem2.Checked = false;
+                            NR3ToolStripMenuItem_rx2.Checked = false;
+                            NR4ToolStripMenuItem_rx2.Checked = false;
+                            if (NR5ToolStripMenuItem_rx2 != null) NR5ToolStripMenuItem_rx2.Checked = true;
+                            chkRX2NR.Text = "NNR";
+                            lblRX2NRLabel.Text = "NNR";
                             chkRX2NR.Checked = true;
                             break;
                     }
@@ -45475,12 +45533,20 @@ namespace Thetis
         }
         private void chkNR_MouseDown(object sender, MouseEventArgs e)
         {
-            if (IsRightButton(e)) SetupForm.ShowSetupTab(Setup.SetupTab.NR_Tab);
+            if (IsRightButton(e))
+            {
+                if (_nr_selected[0] == 5) SetupForm.ShowNNRTab(); // NNR (WDSP 2.11)
+                else SetupForm.ShowSetupTab(Setup.SetupTab.NR_Tab);
+            }
         }
 
         private void chkRX2NR_MouseDown(object sender, MouseEventArgs e)
         {
-            if (IsRightButton(e)) SetupForm.ShowSetupTab(Setup.SetupTab.NR_Tab);
+            if (IsRightButton(e))
+            {
+                if (_nr_selected[1] == 5) SetupForm.ShowNNRTab(); // NNR (WDSP 2.11)
+                else SetupForm.ShowSetupTab(Setup.SetupTab.NR_Tab);
+            }
         }
 
         private void chkNB_MouseDown(object sender, MouseEventArgs e)
