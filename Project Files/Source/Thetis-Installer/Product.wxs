@@ -8,9 +8,14 @@
 <!-- 32-bit / 64-bit variables -->
 <?if $(var.Platform) = x64 ?>
 <?define Win64 = "yes" ?>
-<?define UpgradeCode = "1FB8D39E-FC39-4D30-BD10-F8DFD2F6C2D4"?>
-<?define ProductName = "Thetis HL2" ?>
-<?define ThetisName = "Thetis"?>
+<!-- NNR build (K2COP): own UpgradeCode, product name, folder and shortcut names so it
+     installs next to mi0bot's Thetis HL2 and the official Thetis instead of replacing them. -->
+<?define UpgradeCode = "760FC0DA-5380-4822-A298-065AF4C2FA37"?>
+<?define ProductName = "Thetis HL2 NNR" ?>
+<?define ThetisName = "Thetis-NNR"?>
+<?define InstallFolderName = "Thetis-HL2-NNR" ?>
+<?define DbidAnan = "-dbid:NNR-ANAN" ?>
+<?define DbidHL2 = "-dbid:NNR" ?>
 <?define VC145 = "Microsoft_VC145_CRT_x64.msm" ?>
 <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
 <?define FilesPath = "..\..\Bin\$(var.Platform)\$(var.Configuration)\" ?>
@@ -19,6 +24,9 @@
 <?define UpgradeCode = "B888F619-2F38-4853-BE77-65DF1A224538"?>
 <?define ProductName = "Thetis (32-bit)" ?>
 <?define ThetisName = "Thetis"?>
+<?define InstallFolderName = "Thetis-HL2" ?>
+<?define DbidAnan = "" ?>
+<?define DbidHL2 = "-dbid:HL2" ?>
 <?define VC145 = "Microsoft_VC145_CRT_x86.msm" ?>
 <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
 <?define FilesPath = "..\..\Bin\$(var.Platform)\$(var.Configuration)\" ?>
@@ -119,7 +127,7 @@
 
       <Directory Id="$(var.PlatformProgramFilesFolder)">
         <Directory Id="HPSDRFolder" Name="OpenHPSDR">
-          <Directory Id="INSTALLFOLDER" Name="Thetis-HL2">
+          <Directory Id="INSTALLFOLDER" Name="$(var.InstallFolderName)">
 		  </Directory>
         </Directory>
       </Directory>
@@ -139,21 +147,22 @@
 
   <Fragment>
     <DirectoryRef Id="DesktopFolder">
-      <Component Id="DesktopShortcut" Guid="3A24B19E-E692-4530-ABD8-6E7B737D2060">       
+      <Component Id="DesktopShortcut" Guid="DBECBC34-3B06-49A1-81E2-876CE3BF9C01">
         <Shortcut Id="ProgramDesktopShortcut"
                   Name="$(var.ThetisName)"
                   Description="Run Thetis"
                   Target="[INSTALLFOLDER]Thetis.exe"
+                  Arguments="$(var.DbidAnan)"
                   WorkingDirectory="INSTALLFOLDER" />
         <RegistryValue Root="HKLM" Key="Software\OpenHPSDR\$(var.ThetisName)"
                 Name="desktopShortcut" Type="integer" Value="1" KeyPath="yes" />
       </Component>
-      <Component Id="DesktopShortcutHL2" Guid="2B5082FF-264C-481D-948D-1930362AAAFB">       
+      <Component Id="DesktopShortcutHL2" Guid="22BC0087-C9C8-4A3E-AE7C-BBFCAF17BBB1">
         <Shortcut Id="ProgramDesktopShortcutHL2"
                   Name="$(var.ThetisName)-HL2"
                   Description="Run HL2 Thetis"
                   Target="[INSTALLFOLDER]Thetis.exe"
-                  Arguments="-dbid:HL2"
+                  Arguments="$(var.DbidHL2)"
                   WorkingDirectory="INSTALLFOLDER" />
         <RegistryValue Root="HKLM" Key="Software\OpenHPSDR\$(var.ThetisName)-HL2"
                 Name="desktopShortcut" Type="integer" Value="1" KeyPath="yes" />
@@ -167,13 +176,14 @@
                   Name="$(var.ThetisName)"
                   Description="Run Thetis"
                   Target="[INSTALLFOLDER]Thetis.exe"
+                  Arguments="$(var.DbidAnan)"
                   WorkingDirectory="INSTALLFOLDER"
                   />
         <Shortcut Id="ThetisShortcutHL2"
                   Name="$(var.ThetisName)-HL2"
                   Description="Run HL2 Thetis"
                   Target="[INSTALLFOLDER]Thetis.exe"
-                  Arguments="-dbid:HL2"
+                  Arguments="$(var.DbidHL2)"
                   WorkingDirectory="INSTALLFOLDER"
                   />
         <RemoveFolder Id="RemoveShortcutsDir" On="uninstall" />

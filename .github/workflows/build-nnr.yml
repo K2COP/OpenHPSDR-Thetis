@@ -51,12 +51,50 @@ jobs:
           /v:minimal
           /fl "/flp:logfile=build.log;verbosity=normal"
 
+      # MSI installer (same WiX v3 project mi0bot uses, renamed so it installs alongside his).
+      # Use WiX v3 from the runner if present, otherwise fetch the 3.14 binaries.
+      - name: Get WiX v3
+        id: wix
+        shell: pwsh
+        run: |
+          $dir = $null
+          if ($env:WIX -and (Test-Path (Join-Path $env:WIX 'bin\candle.exe'))) { $dir = Join-Path $env:WIX 'bin' }
+          if (-not $dir) {
+            $dir = Join-Path $env:RUNNER_TEMP 'wix314'
+            Invoke-WebRequest -Uri 'https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip' -OutFile "$env:RUNNER_TEMP\wix.zip"
+            Expand-Archive "$env:RUNNER_TEMP\wix.zip" -DestinationPath $dir -Force
+          }
+          Get-ChildItem $dir -Filter *.targets | ForEach-Object { Write-Host $_.Name }
+          "dir=$dir" >> $env:GITHUB_OUTPUT
+
+      - name: Build installer (MSI)
+        working-directory: Project Files/Source/Thetis-Installer
+        run: >
+          msbuild Thetis-Installer.wixproj
+          /p:Configuration=Release
+          /p:Platform=x64
+          "/p:WixToolPath=${{ steps.wix.outputs.dir }}\\"
+          "/p:WixTargetsPath=${{ steps.wix.outputs.dir }}\wix.targets"
+          "/p:WixTasksPath=${{ steps.wix.outputs.dir }}\WixTasks.dll"
+          "/p:WixExtDir=${{ steps.wix.outputs.dir }}"
+          /v:minimal
+          /fl "/flp:logfile=../installer.log;verbosity=normal"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Thetis-NNR-Installer
+          path: Project Files/bin/Installers/*.msi
+          if-no-files-found: error
+
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
-          path: Project Files/Source/build.log
+          path: |
+            Project Files/Source/build.log
+            Project Files/Source/installer.log
           if-no-files-found: ignore
 
       - name: Upload Thetis build
