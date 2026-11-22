@@ -44259,12 +44259,12 @@ namespace Thetis
         private ToolStripMenuItem NR5ToolStripMenuItem_rx2;
         private void initialiseNNRMenus()
         {
-            NR5ToolStripMenuItem = new ToolStripMenuItem("NNR") { Name = "NR5ToolStripMenuItem", ToolTipText = "Neural network noise reduction (NR5)" };
+            NR5ToolStripMenuItem = new ToolStripMenuItem("NNR") { Name = "NR5ToolStripMenuItem", ToolTipText = "Neural network noise reduction (NNR)" };
             NR5ToolStripMenuItem.Click += (s, e) => { SelectNR(1, true, _nr_selected[0] == 5 ? 0 : 5); };
             int idx = dSPToolStripMenuItem.DropDownItems.IndexOf(NR4ToolStripMenuItem);
             dSPToolStripMenuItem.DropDownItems.Insert(idx + 1, NR5ToolStripMenuItem);
 
-            NR5ToolStripMenuItem_rx2 = new ToolStripMenuItem("NNR") { Name = "NR5ToolStripMenuItem_rx2", ToolTipText = "Neural network noise reduction (NR5)" };
+            NR5ToolStripMenuItem_rx2 = new ToolStripMenuItem("NNR") { Name = "NR5ToolStripMenuItem_rx2", ToolTipText = "Neural network noise reduction (NNR)" };
             NR5ToolStripMenuItem_rx2.Click += (s, e) => { SelectNR(2, true, _nr_selected[1] == 5 ? 0 : 5); };
             idx = dSPToolStripMenuItem1.DropDownItems.IndexOf(NR4ToolStripMenuItem_rx2);
             dSPToolStripMenuItem1.DropDownItems.Insert(idx + 1, NR5ToolStripMenuItem_rx2);

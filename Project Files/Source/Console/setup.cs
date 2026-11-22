@@ -35718,8 +35718,8 @@ namespace Thetis
             {
                 Location = new Point(8, 148),
                 Size = new Size(478, 100),
-                Text = "NNR (NR5) is the WDSP 2.11 neural noise reduction by NR0V.\n" +
-                       "Turn it on with the NR button (cycle to NNR), the DSP menu, CAT ZZNE5/ZZNF5 or MIDI.\n\n" +
+                Text = "NNR is the WDSP 2.11 neural network noise reduction by NR0V.\n" +
+                       "Turn it on with the NR button (cycle to NNR), the DSP menu, CAT or MIDI.\n\n" +
                        "The model follows the mode automatically: CW model in CWL/CWU, Voice model in all other modes.\n" +
                        "Premium sounds better but needs much more CPU than Standard.\n" +
                        "A lower mask floor removes more noise; a higher floor lets more through and sounds more natural.\n" +

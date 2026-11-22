@@ -534,9 +534,9 @@ namespace Midi2Cat.Data
         APFType_biquad = 315,
 
         // NNR - neural noise reduction (WDSP 2.11); ids chosen well clear of upstream numbering
-        [CatCommandAttribute("Noise Reduction 5 (NNR) On Off", ControlType.Button, true)]
+        [CatCommandAttribute("Noise Reduction NNR On Off", ControlType.Button, true)]
         NoiseReduction5OnOff = 950,
-        [CatCommandAttribute("Rx2 Noise Reduction 5 (NNR) On Off", ControlType.Button, true)]
+        [CatCommandAttribute("Rx2 Noise Reduction NNR On Off", ControlType.Button, true)]
         Rx2NoiseReduction5OnOff = 951,
 
         [CatCommandAttribute("Toggle Wheel to VFOA/VFOB ", ControlType.Button)]  //-W2PA Added a toggle between A/B for main wheel 

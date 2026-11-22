@@ -18,7 +18,7 @@ This is **not** an official release by Reid or Richie. It is Reid's v2.10.3.15 w
 
 ## What's added
 
-- **NNR (NR5)** from official TAPR WDSP 2.11, built from source into `wdsp.dll`, with all four of Warren's models:
+- **NNR (Neural Noise Reduction)** from official TAPR WDSP 2.11, built from source into `wdsp.dll`, with all four of Warren's models:
 
   | Model | For | Notes |
   |---|---|---|
@@ -29,9 +29,9 @@ This is **not** an official release by Reid or Richie. It is Reid's v2.10.3.15 w
 
 - **The model follows the mode automatically:** the CW model in CWL/CWU, and the Voice model in every other mode. You only choose Standard or Premium for each.
 - An **NNR** entry in the DSP menu, on the front-panel **NR** button, and a **Setup → DSP → NNR** tab.
-- **CAT:** `ZZNE5;` / `ZZNF5;` select NNR on RX1 / RX2 (0 = off, 1–4 = NR1–NR4, 5 = NNR).
-- **MIDI (Midi2Cat):** "Noise Reduction 5 (NNR) On Off" and "Rx2 Noise Reduction 5 (NNR) On Off".
-- **TCI:** NNR shows up to TCI clients as noise reduction 5.
+- **CAT:** NNR can be turned on with the existing `ZZNE` (RX1) / `ZZNF` (RX2) commands. CAT only uses numbers, so NNR's code is `ZZNE5;` / `ZZNF5;` (`0` = off, `1`–`4` = NR1–NR4).
+- **MIDI (Midi2Cat):** "Noise Reduction NNR On Off" and "Rx2 Noise Reduction NNR On Off".
+- **TCI:** TCI clients are told when NNR is on. TCI has no name for NNR, so it is sent as the next noise-reduction number after NR4.
 - The title bar reads **"HL2 NNR (MI0BOT + K2COP)"**, so you can always tell which Thetis is running.
 
 Everything else (HL2 support, PureSignal, the Database Manager, TCI, skins and the rest) is exactly as in Reid's v2.10.3.15.
@@ -82,7 +82,7 @@ Any of these work:
 
 - **NR button:** press it repeatedly. It steps NR → NR2 → NR3 → NR4 → **NNR** → off. Stop when it reads **NNR**.
 - **DSP menu:** choose **NNR** (for RX1 or RX2).
-- **CAT:** send `ZZNE5;` (RX1) or `ZZNF5;` (RX2).
+- **CAT:** send `ZZNE5;` (RX1) or `ZZNF5;` (RX2). This is NNR's CAT code.
 
 That's it. The Voice or CW model is picked for you from the mode.
 
@@ -101,7 +101,7 @@ Start with **Premium**. If the audio crackles or the CPU is struggling, switch t
 - **CPU:** NNR is a neural network and uses much more CPU than NR1–NR4. Premium uses the most. Using NNR on both RX1 and RX2 doubles the load.
 - **One noise reduction at a time:** NNR replaces NR1–NR4, the same way they replace each other.
 - **In SSB, CW and digital modes,** NNR takes over the front of the receive chain (Warren's design in WDSP 2.11). While it's on, the **RX EQ** and **SNB** are bypassed. They come back as soon as you turn NNR off. In AM and FM, NNR runs after the demodulator instead.
-- **TCI clients** see NNR as noise reduction "5". Some apps may show this as a plain NR on/off, or not at all.
+- **TCI clients** don't know about NNR yet. Some apps may show it as a plain NR on/off, or not at all.
 - **ANAN radios:** the ANAN code from Reid's build is unchanged and the Thetis-NNR shortcut is there for it, but NNR has only been tested on air with a **Hermes Lite 2**.
 - **Support:** please **don't** contact Reid or Richie about NNR in this build. They didn't make it. Open an [issue here](../../issues) instead.
 
