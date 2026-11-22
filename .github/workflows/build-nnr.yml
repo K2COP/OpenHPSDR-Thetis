@@ -57,15 +57,33 @@ jobs:
         id: wix
         shell: pwsh
         run: |
-          $dir = $null
-          if ($env:WIX -and (Test-Path (Join-Path $env:WIX 'bin\candle.exe'))) { $dir = Join-Path $env:WIX 'bin' }
-          if (-not $dir) {
+          # Installed WiX keeps candle.exe in $env:WIX\bin and wix.targets / WixTasks.dll under
+          # MSBuild\Microsoft\WiX\v3.x; the binaries zip has them all in one folder.
+          $roots = @()
+          if ($env:WIX) { $roots += $env:WIX }
+          $roots += "${env:ProgramFiles(x86)}\MSBuild\Microsoft\WiX"
+          function Find($name) {
+            foreach ($r in $roots) {
+              if (Test-Path $r) {
+                $f = Get-ChildItem $r -Recurse -Filter $name -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($f) { return $f.FullName }
+              }
+            }
+          }
+          $candle = Find 'candle.exe'; $targets = Find 'wix.targets'; $tasks = Find 'WixTasks.dll'
+          if (-not ($candle -and $targets -and $tasks)) {
             $dir = Join-Path $env:RUNNER_TEMP 'wix314'
             Invoke-WebRequest -Uri 'https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip' -OutFile "$env:RUNNER_TEMP\wix.zip"
             Expand-Archive "$env:RUNNER_TEMP\wix.zip" -DestinationPath $dir -Force
+            $roots = @($dir)
+            $candle = Find 'candle.exe'; $targets = Find 'wix.targets'; $tasks = Find 'WixTasks.dll'
           }
-          Get-ChildItem $dir -Filter *.targets | ForEach-Object { Write-Host $_.Name }
-          "dir=$dir" >> $env:GITHUB_OUTPUT
+          if (-not ($candle -and $targets -and $tasks)) { throw "WiX v3 not found (candle=$candle targets=$targets tasks=$tasks)" }
+          $bin = Split-Path $candle -Parent
+          Write-Host "candle:  $candle"; Write-Host "targets: $targets"; Write-Host "tasks:   $tasks"
+          "bin=$bin" >> $env:GITHUB_OUTPUT
+          "targets=$targets" >> $env:GITHUB_OUTPUT
+          "tasks=$tasks" >> $env:GITHUB_OUTPUT
 
       - name: Build installer (MSI)
         working-directory: Project Files/Source/Thetis-Installer
@@ -73,10 +91,10 @@ jobs:
           msbuild Thetis-Installer.wixproj
           /p:Configuration=Release
           /p:Platform=x64
-          "/p:WixToolPath=${{ steps.wix.outputs.dir }}\\"
-          "/p:WixTargetsPath=${{ steps.wix.outputs.dir }}\wix.targets"
-          "/p:WixTasksPath=${{ steps.wix.outputs.dir }}\WixTasks.dll"
-          "/p:WixExtDir=${{ steps.wix.outputs.dir }}"
+          "/p:WixToolPath=${{ steps.wix.outputs.bin }}\\"
+          "/p:WixTargetsPath=${{ steps.wix.outputs.targets }}"
+          "/p:WixTasksPath=${{ steps.wix.outputs.tasks }}"
+          "/p:WixExtDir=${{ steps.wix.outputs.bin }}"
           /v:minimal
           /fl "/flp:logfile=../installer.log;verbosity=normal"
 
@@ -98,6 +116,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload Thetis build
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: Thetis-NNR-x64-Release
