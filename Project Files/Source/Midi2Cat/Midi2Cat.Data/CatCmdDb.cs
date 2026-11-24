@@ -538,6 +538,10 @@ namespace Midi2Cat.Data
         NoiseReduction5OnOff = 950,
         [CatCommandAttribute("Rx2 Noise Reduction NNR On Off", ControlType.Button, true)]
         Rx2NoiseReduction5OnOff = 951,
+        [CatCommandAttribute("NNR Standard/Premium", ControlType.Button, true)]
+        NNRPremiumOnOff = 952,
+        [CatCommandAttribute("Rx2 NNR Standard/Premium", ControlType.Button, true)]
+        Rx2NNRPremiumOnOff = 953,
 
         [CatCommandAttribute("Toggle Wheel to VFOA/VFOB ", ControlType.Button)]  //-W2PA Added a toggle between A/B for main wheel 
         ToggleVFOWheel = 700,

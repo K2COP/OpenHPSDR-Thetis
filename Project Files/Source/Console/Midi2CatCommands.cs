@@ -2286,6 +2286,33 @@ namespace Thetis
             }
             return CmdState.NoChange;
         }
+        // NNR: toggle Standard/Premium for the model the RX's current mode uses (Voice, or CW in CWL/CWU)
+        public CmdState NNRPremiumOnOff(int msg, MidiDevice device)
+        {
+            return nnrPremiumToggle(msg, 1);
+        }
+        public CmdState Rx2NNRPremiumOnOff(int msg, MidiDevice device)
+        {
+            return nnrPremiumToggle(msg, 2);
+        }
+        private CmdState nnrPremiumToggle(int msg, int rx)
+        {
+            if (msg == 127)
+            {
+                parser.nGet = 0;
+                parser.nSet = 1;
+
+                string state = rx == 2 ? commands.ZZNJ("") : commands.ZZNI("");
+                if (state != "1")
+                {
+                    if (rx == 2) commands.ZZNJ("1"); else commands.ZZNI("1");
+                    return CmdState.On;
+                }
+                if (rx == 2) commands.ZZNJ("0"); else commands.ZZNI("0");
+                return CmdState.Off;
+            }
+            return CmdState.NoChange;
+        }
         public CmdState Rx2PreAmpOnOff(int msg, MidiDevice device)
         {
             if (msg == 127)

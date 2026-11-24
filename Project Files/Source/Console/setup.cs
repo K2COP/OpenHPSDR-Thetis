@@ -35780,6 +35780,25 @@ namespace Thetis
             ShowSetupTab(SetupTab.NR_Tab); // shows the form and selects the DSP tab
             tcDSP.SelectedTab = tpDSPNNR;
         }
+
+        // Standard (0) / Premium (1) for the model that the given RX's current mode uses:
+        // the CW setting in CWL/CWU, the Voice setting in all other modes. Used by CAT ZZNI/ZZNJ and MIDI.
+        // Setting it changes the Setup combo, so the choice is saved like a change made by hand.
+        private ComboBoxTS nnrComboForCurrentMode(int rx)
+        {
+            DSPMode mode = rx == 2 ? console.RX2DSPMode : console.RX1DSPMode;
+            bool cw = mode == DSPMode.CWL || mode == DSPMode.CWU;
+            if (rx == 2) return cw ? comboNNRCW_rx2 : comboNNRVoice_rx2;
+            return cw ? comboNNRCW_rx1 : comboNNRVoice_rx1;
+        }
+        public int GetNNRPremium(int rx)
+        {
+            return nnrComboForCurrentMode(rx).SelectedIndex == 1 ? 1 : 0;
+        }
+        public void SetNNRPremium(int rx, int premium)
+        {
+            nnrComboForCurrentMode(rx).SelectedIndex = premium != 0 ? 1 : 0;
+        }
         #endregion
 
         private void nudNR4_red_rx1_ValueChanged(object sender, EventArgs e)

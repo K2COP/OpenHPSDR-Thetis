@@ -847,6 +847,20 @@
 		<ngetparms>0</ngetparms>
 		<nansparms>3</nansparms>
 	</catstruct>
+	<catstruct code="ZZNI">
+		<desc>Rx1 NNR Standard/Premium for the current mode</desc>
+		<active>true</active>
+		<nsetparms>1</nsetparms>
+		<ngetparms>0</ngetparms>
+		<nansparms>1</nansparms>
+	</catstruct>
+	<catstruct code="ZZNJ">
+		<desc>Rx2 NNR Standard/Premium for the current mode</desc>
+		<active>true</active>
+		<nsetparms>1</nsetparms>
+		<ngetparms>0</ngetparms>
+		<nansparms>1</nansparms>
+	</catstruct>
 	<catstruct code="ZZNR">
 		<desc>extended rx1 nr status</desc>
 		<active>true</active>

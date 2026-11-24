@@ -1051,6 +1051,12 @@ namespace Thetis
                 case "ZZNH":
                     rtncmd = cmdlist.ZZNH(suffix);
                     break;
+                case "ZZNI": // NNR Standard/Premium RX1
+                    rtncmd = cmdlist.ZZNI(suffix);
+                    break;
+                case "ZZNJ": // NNR Standard/Premium RX2
+                    rtncmd = cmdlist.ZZNJ(suffix);
+                    break;
                 //
                 case "ZZNL":
 					rtncmd = cmdlist.ZZNL(suffix);

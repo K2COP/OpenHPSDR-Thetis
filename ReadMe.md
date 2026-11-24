@@ -33,7 +33,8 @@ This is **not** an official release by Reid or Richie. It is Reid's v2.10.3.15 w
 - **The model follows the mode automatically:** the CW model in CWL/CWU, and the Voice model in every other mode. You only choose Standard or Premium for each.
 - An **NNR** entry in the DSP menu, on the front-panel **NR** button, and a **Setup → DSP → NNR** tab.
 - **CAT:** NNR can be turned on with the existing `ZZNE` (RX1) / `ZZNF` (RX2) commands. CAT only uses numbers, so NNR's code is `ZZNE5;` / `ZZNF5;` (`0` = off, `1`–`4` = NR1–NR4).
-- **MIDI (Midi2Cat):** "Noise Reduction NNR On Off" and "Rx2 Noise Reduction NNR On Off".
+- **CAT, Standard/Premium:** `ZZNI` (RX1) / `ZZNJ` (RX2). `ZZNI1;` = Premium, `ZZNI0;` = Standard, `ZZNI;` reads it back. It changes the model for the current mode (the CW model in CWL/CWU, the Voice model in other modes), the same as picking it on the Setup NNR tab.
+- **MIDI (Midi2Cat):** "Noise Reduction NNR On Off" and "Rx2 Noise Reduction NNR On Off", plus "NNR Standard/Premium" and "Rx2 NNR Standard/Premium" toggles.
 - **TCI:** TCI clients are told when NNR is on. TCI has no name for NNR, so it is sent as the next noise-reduction number after NR4.
 - The title bar reads **"HL2 NNR (MI0BOT + K2COP)"**, so you can always tell which Thetis is running.
 

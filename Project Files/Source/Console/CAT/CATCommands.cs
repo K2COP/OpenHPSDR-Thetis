@@ -5106,6 +5106,47 @@ namespace Thetis
                 return parser.Error1;
             }
         }
+        // NNR: sets or reads Standard (0) / Premium (1) for the model the RX's current mode uses
+        // (the CW model in CWL/CWU, the Voice model in all other modes). ZZNI = RX1, ZZNJ = RX2.
+        public string ZZNI(string s)
+        {
+            return nnrPremium(1, s);
+        }
+        public string ZZNJ(string s)
+        {
+            return nnrPremium(2, s);
+        }
+        private string nnrPremium(int rx, string s)
+        {
+            if (s.Length == parser.nSet && (s == "0" || s == "1"))
+            {
+                if (!console.IsSetupFormNull)
+                {
+                    int premium = s == "1" ? 1 : 0;
+                    if (console.SetupForm.InvokeRequired)
+                        console.SetupForm.Invoke(new MethodInvoker(delegate { console.SetupForm.SetNNRPremium(rx, premium); }));
+                    else
+                        console.SetupForm.SetNNRPremium(rx, premium);
+                }
+                return "";
+            }
+            else if (s.Length == parser.nGet)
+            {
+                int premium = 0;
+                if (!console.IsSetupFormNull)
+                {
+                    if (console.SetupForm.InvokeRequired)
+                        console.SetupForm.Invoke(new MethodInvoker(delegate { premium = console.SetupForm.GetNNRPremium(rx); }));
+                    else
+                        premium = console.SetupForm.GetNNRPremium(rx);
+                }
+                return premium.ToString();
+            }
+            else
+            {
+                return parser.Error1;
+            }
+        }
         // Sets the RX1 NR4 reduction amount, supplied as int from 0 to 100, then converted to 0-20dB
         public string ZZNH(string s)
         {
