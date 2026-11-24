@@ -4,7 +4,10 @@
 
 Latest release: **v2.10.3.15-nnr1** — based on mi0bot's Thetis HL2 **v2.10.3.15** (final release, 4 September 2026).
 
-➡️ **[Download the installer from the Releases page](../../releases/latest)** — `Thetis-NNR-HL2-v2.10.3.15-x64.msi`
+➡️ **[Download from the Releases page](../../releases/latest)**
+
+- **Installer (recommended):** `Thetis-NNR-HL2-v2.10.3.15-x64.msi`
+- **Portable zip (try it without installing):** `Thetis-NNR-HL2-v2.10.3.15-x64.zip`. See [Try it without installing](#try-it-without-installing-portable-zip).
 
 ---
 
@@ -64,6 +67,23 @@ The installer makes two shortcuts (on the desktop and in Start → OpenHPSDR →
 Both open the same program with separate databases, so the HL2 and ANAN settings never mix. Both use databases separate from Reid's and the official Thetis, so neither of those ever sees NNR settings.
 
 To uninstall, go to **Settings → Apps → Thetis HL2 NNR**. Your databases are kept.
+
+## Try it without installing (portable zip)
+
+If you'd rather not run an installer, download `Thetis-NNR-HL2-v2.10.3.15-x64.zip` instead. It's the same program as the MSI, just not installed. Full steps are in `README-FIRST.txt` inside the zip. In short:
+
+1. **Back up your database** in your current Thetis (see above).
+2. **Unblock the zip before extracting it:** right-click the zip → **Properties** → tick **Unblock** (if shown) → OK. Otherwise Windows may block the DLLs.
+3. **Extract it to a new folder**, e.g. `C:\Thetis-NNR-HL2`. Don't extract over an existing Thetis.
+4. **Install the Microsoft VC++ x64 runtime** from [aka.ms/vs/17/release/vc_redist.x64.exe](https://aka.ms/vs/17/release/vc_redist.x64.exe), unless mi0bot's or the official Thetis installer has been run on this PC before. Without it, Thetis stops at startup with a `channelmaster.dll` error.
+5. **Make a shortcut:** right-click `Thetis.exe` → **Send to → Desktop (create shortcut)**. In the shortcut's **Properties → Target**, add ` -dbid:NNR` after the closing quote:
+   ```
+   "C:\Thetis-NNR-HL2\Thetis-NNR-HL2-v2.10.3.15\Thetis.exe" -dbid:NNR
+   ```
+   This is the same database the installer's **Thetis-NNR-HL2** shortcut uses, so your settings carry over if you install the MSI later. For an ANAN radio, use `-dbid:NNR-ANAN`.
+6. **Allow the Windows Firewall prompt** on first run (at least Private networks). Thetis needs it to find the HL2. The installer adds these rules itself; the zip can't.
+
+To remove it, delete the folder and the shortcut.
 
 ## Bringing over your existing settings
 
